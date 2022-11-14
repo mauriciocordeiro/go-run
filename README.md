@@ -7,6 +7,12 @@ An CLI .ics calendar generator for running plans.
 go build main.go
 ```
 
+## Install (Linux)
+
+```sh
+make install
+```
+
 ## Usage
 
 ```sh
@@ -40,7 +46,7 @@ $ go-run -help
 go-run -level 2 -start '2023-01-02 09:00:00' -stop '2023-06-02 09:00:00' -maxFreq 5 -avgRun 5 -longRun 10 -addEachWeek 4 -freq 3
 ```
 
-This command will generate events from start to stop date, 3 runs per week (two 5k runs (`avgRun`) and one 10k (`longRun`)) and will increase an `avgRun` each 4 weeks until a top 5 runs per week.
+This command will generate events from start to stop date, 3 runs per week (two 5k runs (`avgRun`) and one 10k (`longRun`)) and will increase an `avgRun` each 4 weeks until a max 5 runs per week.
 
 
 ### Run Schedule
