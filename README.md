@@ -30,8 +30,6 @@ $ go-run -help
         If true, shows 'Running Order of Operation' document
   -freq int
         Initial frequency of runs per week (default 4)
-  -level int
-        Runner level (default 2)
   -longRun int
         Long run distance (for saturday) (default 10)
   -maxFreq int
