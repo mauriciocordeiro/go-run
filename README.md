@@ -1,4 +1,7 @@
 # go-run
+
+[![Go](https://github.com/mauriciocordeiro/go-run/actions/workflows/go.yml/badge.svg)](https://github.com/mauriciocordeiro/go-run/actions/workflows/go.yml)
+
 An CLI .ics calendar generator for running plans.
 
 ## Build
