@@ -13,7 +13,7 @@ import (
 const (
 	logFmtRun   = "%2d\t%2d Km\t%s\n"
 	dateFormat  = "2006-01-02 15:04:05"
-	eventFormat = "%d KM (%d/%d)(lvl%d)"
+	eventFormat = "%d KM (%d/%d)"
 	docUrl      = "https://drive.google.com/file/d/1wzPab2BlX4N_2vEJMdVu_alagE6pIlAt/view"
 	banner      = `														  
 ________  ________                 ________  ___  ___  ________      
@@ -31,7 +31,6 @@ ________  ________                 ________  ___  ___  ________
 var (
 	now = time.Now()
 
-	level       = flag.Int("level", 2, "Runner level")
 	freq        = flag.Int("freq", 4, "Initial frequency of runs per week")
 	maxFreq     = flag.Int("maxFreq", 7, "Max frequency of runs per week")
 	longRun     = flag.Int("longRun", 10, "Long run distance (for saturday)")
@@ -132,7 +131,7 @@ func generateCalendar(plan []Run) error {
 
 	for i, run := range plan {
 		event := calendar.AddEvent(strconv.FormatInt(now.Unix()+int64(i), 10))
-		event.SetSummary(fmt.Sprintf(eventFormat, run.Distance, i+1, len(plan), *level))
+		event.SetSummary(fmt.Sprintf(eventFormat, run.Distance, i+1, len(plan)))
 		event.SetCreatedTime(now)
 		event.SetModifiedAt(now)
 		event.SetStartAt(run.Day)
