@@ -62,7 +62,7 @@ func main() {
 	fmt.Print(banner)
 
 	if *showDoc {
-		fmt.Printf("Running Order of Operation: %s\n", docUrl)
+		printDoc()
 		return
 	}
 
@@ -189,4 +189,8 @@ func defStop() string {
 
 func fileName() string {
 	return fmt.Sprintf("%s/go-run_-_plan.ics", *dir)
+}
+
+func printDoc() {
+	fmt.Printf("You can use the Running Order of Operation to know how setup your calendar.\n[%s]", docUrl)
 }
