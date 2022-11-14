@@ -13,7 +13,8 @@ import (
 const (
 	logFmtRun   = "%2d\t%2d Km\t%s\n"
 	dateFormat  = "2006-01-02 15:04:05"
-	eventFormat = "%d KM (%d/%d)"
+	eventFormat = "%d KM (%d/%d)(lvl%d)"
+	docUrl      = "https://drive.google.com/file/d/1wzPab2BlX4N_2vEJMdVu_alagE6pIlAt/view"
 )
 
 var (
@@ -24,10 +25,12 @@ var (
 	maxFreq     = flag.Int("maxFreq", 7, "Max frequency of runs per week")
 	longRun     = flag.Int("longRun", 10, "Long run distance (for saturday)")
 	avgRun      = flag.Int("avgRun", 5, "Average run distance (for weekdays)")
-	start       = flag.String("start", now.String(), "First race day [yyyy-MM-dd HH:mm:ss UTC]")
-	stop        = flag.String("stop", now.AddDate(0, 6, 0).String(), "Last race day [yyyy-MM-dd HH:mm:ss UTC]")
-	dir         = flag.String("dir", ".", "Directory for .ics file")
+	start       = flag.String("start", defStart(), "First race day [yyyy-MM-dd HH:mm:ss UTC]")
+	stop        = flag.String("stop", defStop(), "Last race day [yyyy-MM-dd HH:mm:ss UTC]")
 	addEachWeek = flag.Int("addEachWeek", 4, "Add a run day each x weeks")
+	dir         = flag.String("dir", ".", "Directory for .ics file")
+	verbose     = flag.Bool("v", false, "Verbose")
+	showDoc     = flag.Bool("doc", false, "If true, shows 'Running Order of Operation' document")
 
 	freqSchedule = map[int][]time.Weekday{
 		2: {time.Tuesday, time.Thursday},
@@ -47,10 +50,15 @@ type Run struct {
 func main() {
 	flag.Parse()
 
-	// TODO: validate flags
+	if *showDoc {
+		fmt.Printf("Running Order of Operation: %s\n", docUrl)
+		return
+	}
 
 	plan := buildPlan()
 	generateCalendar(plan)
+
+	fmt.Printf("Done! Go see it at %s\n", fileName())
 }
 
 func buildPlan() []Run {
@@ -63,38 +71,25 @@ func buildPlan() []Run {
 	weekCount := 0
 
 	for currentDate.Before(finalDate) {
-		switch *level {
-		case 1:
-			fmt.Printf("Level %d not imlemented.\n", *level)
-		case 2:
-			if currentDate.Weekday() == time.Saturday {
-				distance = *longRun
-				weekCount++
-			} else {
-				distance = *avgRun
-			}
+		if currentDate.Weekday() == time.Saturday {
+			distance = *longRun
+			weekCount++
+		} else {
+			distance = *avgRun
+		}
 
-			if contains(schedule, currentDate.Weekday()) {
-				plan = append(plan, Run{
-					Day:      currentDate,
-					Distance: distance,
-				})
-			}
+		if contains(schedule, currentDate.Weekday()) {
+			plan = append(plan, Run{
+				Day:      currentDate,
+				Distance: distance,
+			})
+		}
 
-			if weekCount == *addEachWeek {
-				weekCount = 0
-				if len(schedule) < *maxFreq {
-					schedule = freqSchedule[len(schedule)+1]
-				}
+		if weekCount == *addEachWeek {
+			weekCount = 0
+			if len(schedule) < *maxFreq {
+				schedule = freqSchedule[len(schedule)+1]
 			}
-		case 3:
-			fmt.Printf("Level %d not imlemented.\n", *level)
-		case 4:
-			fmt.Printf("Level %d not imlemented.\n", *level)
-		case 5:
-			fmt.Printf("Level %d not imlemented.\n", *level)
-		case 6:
-			fmt.Printf("Level %d not imlemented.\n", *level)
 		}
 
 		currentDate = currentDate.AddDate(0, 0, 1)
@@ -109,7 +104,7 @@ func generateCalendar(plan []Run) {
 
 	for i, run := range plan {
 		event := calendar.AddEvent(strconv.FormatInt(now.Unix()+int64(i), 10))
-		event.SetSummary(fmt.Sprintf(eventFormat, run.Distance, i+1, len(plan)))
+		event.SetSummary(fmt.Sprintf(eventFormat, run.Distance, i+1, len(plan), *level))
 		event.SetCreatedTime(now)
 		event.SetModifiedAt(now)
 		event.SetStartAt(run.Day)
@@ -119,7 +114,7 @@ func generateCalendar(plan []Run) {
 
 	src := calendar.Serialize()
 
-	file, err := os.Create(fmt.Sprintf("%s/go-run %s.ics", *dir, now.Format(dateFormat)))
+	file, err := os.Create(fileName())
 	if err != nil {
 		panic(fmt.Sprintf("Error creating .ics file\n%s", err.Error()))
 	}
@@ -129,7 +124,9 @@ func generateCalendar(plan []Run) {
 }
 
 func log(i int, run Run) {
-	fmt.Printf(logFmtRun, i, run.Distance, run.Day.Format(dateFormat))
+	if *verbose {
+		fmt.Printf(logFmtRun, i, run.Distance, run.Day.Format(dateFormat))
+	}
 }
 
 func parse(src string) time.Time {
@@ -148,4 +145,16 @@ func contains(week []time.Weekday, day time.Weekday) bool {
 		}
 	}
 	return false
+}
+
+func defStart() string {
+	return now.Format(dateFormat)
+}
+
+func defStop() string {
+	return now.AddDate(0, 3, 0).Format(dateFormat)
+}
+
+func fileName() string {
+	return fmt.Sprintf("%s/go-run %s.ics", *dir, now.Format(dateFormat))
 }
