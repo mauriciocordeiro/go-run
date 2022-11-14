@@ -15,6 +15,17 @@ const (
 	dateFormat  = "2006-01-02 15:04:05"
 	eventFormat = "%d KM (%d/%d)(lvl%d)"
 	docUrl      = "https://drive.google.com/file/d/1wzPab2BlX4N_2vEJMdVu_alagE6pIlAt/view"
+	banner      = `														  
+________  ________                 ________  ___  ___  ________      
+|\   ____\|\   __  \               |\   __  \|\  \|\  \|\   ___  \    
+\ \  \___|\ \  \|\  \  ____________\ \  \|\  \ \  \\\  \ \  \\ \  \   
+ \ \  \  __\ \  \\\  \|\____________\ \   _  _\ \  \\\  \ \  \\ \  \  
+  \ \  \|\  \ \  \\\  \|____________|\ \  \\  \\ \  \\\  \ \  \\ \  \ 
+   \ \_______\ \_______\              \ \__\\ _\\ \_______\ \__\\ \__\
+    \|_______|\|_______|               \|__|\|__|\|_______|\|__| \|__|
+	
+
+`
 )
 
 var (
@@ -49,6 +60,7 @@ type Run struct {
 
 func main() {
 	flag.Parse()
+	fmt.Print(banner)
 
 	if *showDoc {
 		fmt.Printf("Running Order of Operation: %s\n", docUrl)
