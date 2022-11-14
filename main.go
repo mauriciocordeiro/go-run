@@ -67,16 +67,32 @@ func main() {
 		return
 	}
 
-	plan := buildPlan()
-	generateCalendar(plan)
+	plan, err := buildPlan()
+	if err != nil {
+		panic(err)
+	}
+
+	err = generateCalendar(plan)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Printf("Done! Go see it at %s\n", fileName())
 }
 
-func buildPlan() []Run {
+func buildPlan() ([]Run, error) {
 	var plan = []Run{}
-	currentDate := parse(*start)
-	finalDate := parse(*stop).AddDate(0, 0, 1)
+	currentDate, err := parse(*start)
+	if err != nil {
+		return plan, err
+	}
+
+	finalDate, err := parse(*stop)
+	if err != nil {
+		return plan, err
+	}
+
+	finalDate = finalDate.AddDate(0, 0, 1)
 	schedule := freqSchedule[*freq]
 
 	distance := 0
@@ -107,10 +123,10 @@ func buildPlan() []Run {
 		currentDate = currentDate.AddDate(0, 0, 1)
 	}
 
-	return plan
+	return plan, nil
 }
 
-func generateCalendar(plan []Run) {
+func generateCalendar(plan []Run) error {
 	calendar := ics.NewCalendar()
 	calendar.SetMethod(ics.MethodRequest)
 
@@ -128,11 +144,16 @@ func generateCalendar(plan []Run) {
 
 	file, err := os.Create(fileName())
 	if err != nil {
-		panic(fmt.Sprintf("Error creating .ics file\n%s", err.Error()))
+		return err
 	}
-	defer file.Close()
 
 	file.WriteString(src)
+
+	if err := file.Close(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func log(i int, run Run) {
@@ -141,13 +162,13 @@ func log(i int, run Run) {
 	}
 }
 
-func parse(src string) time.Time {
+func parse(src string) (time.Time, error) {
 	date, err := time.Parse(dateFormat, src)
 	if err != nil {
-		panic(fmt.Sprintf("Error parsing date param. %s\n%s", src, err.Error()))
+		return time.Time{}, err
 	}
 
-	return date
+	return date, nil
 }
 
 func contains(week []time.Weekday, day time.Weekday) bool {
@@ -168,5 +189,5 @@ func defStop() string {
 }
 
 func fileName() string {
-	return fmt.Sprintf("%s/go-run %s.ics", *dir, now.Format(dateFormat))
+	return fmt.Sprintf("%s/go-run_-_plan.ics", *dir)
 }
